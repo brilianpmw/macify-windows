@@ -30,9 +30,9 @@ A_TrayMenu.Add("Exit", (*) => ExitApp())
 ; ------------------------------------------------------------------------------
 TakeScreenshot(*) {
     try {
-        Run("explorer.exe ms-screenclip:")
+        Run("ms-screenclip:")
     } catch {
-        SendInput("#{Shift}s")
+        SendInput("#+s")
     }
 }
 
