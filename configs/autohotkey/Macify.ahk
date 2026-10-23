@@ -19,11 +19,22 @@ global isSuspended := false
 
 ; --- Tray Menu ---
 A_TrayMenu.Delete()
-A_TrayMenu.Add("Macify Windows v1.3", (*) => ShowWelcomeDialog())
+A_TrayMenu.Add("Macify Windows v1.4", (*) => ShowWelcomeDialog())
 A_TrayMenu.Add() ; Separator
 A_TrayMenu.Add("Toggle Gaming Mode (Ctrl+Shift+G)", ToggleSuspend)
 A_TrayMenu.Add("Reload Script", (*) => Reload())
 A_TrayMenu.Add("Exit", (*) => ExitApp())
+
+; ------------------------------------------------------------------------------
+;  SCREENSHOT HELPER (100% Reliable via Windows Shell Protocol)
+; ------------------------------------------------------------------------------
+TakeScreenshot(*) {
+    try {
+        Run("explorer.exe ms-screenclip:")
+    } catch {
+        SendInput("#{Shift}s")
+    }
+}
 
 ; ------------------------------------------------------------------------------
 ;  STARTUP CONFIRMATION WINDOW
@@ -36,7 +47,7 @@ ShowWelcomeDialog() {
     splash.Add("Text", "w380", "`nYour macOS shortcuts are now running in the background:`n`n  • Cmd + Shift + 4  ->  Screenshot area`n  • Cmd + C / Cmd + V  ->  Copy / Paste`n  • Cmd + Space  ->  Spotlight search`n  • Option + ◄ / ►  ->  Jump word-by-word`n  • Ctrl + Shift + G  ->  Pause for Gaming Mode`n")
     
     btnSnip := splash.Add("Button", "w180 h32", "📸 Test Screenshot")
-    btnSnip.OnEvent("Click", (*) => Run("ms-screenclip:"))
+    btnSnip.OnEvent("Click", (*) => TakeScreenshot())
     
     btnOk := splash.Add("Button", "x+20 w180 h32 Default", "Minimize to Tray")
     btnOk.OnEvent("Click", (*) => splash.Destroy())
@@ -85,19 +96,29 @@ GroupAdd("Terminals", "ahk_exe bash.exe")
 
 ; ==============================================================================
 ;  SECTION 2: SCREENSHOT SHORTCUTS (macOS Style)
-;  Uses native ms-screenclip: protocol for 100% reliable region capture on Windows 11.
+;  Cmd + Shift + 4  -> Snipping Tool (Region Capture)
+;  Cmd + Shift + 3  -> Fullscreen Screenshot
+;  Cmd + Shift + 5  -> Snipping Tool / Screen Recording
+;  Also mapped to $ character in case keyboard translates Shift+4 to $
 ; ==============================================================================
-#+4::Run("ms-screenclip:")
-!+4::Run("ms-screenclip:")
-^+4::Run("ms-screenclip:")
 
+; --- Region Screenshot: Cmd + Shift + 4 / $ ---
+#+4::TakeScreenshot()
+!+4::TakeScreenshot()
+^+4::TakeScreenshot()
+#$::TakeScreenshot()
+!$::TakeScreenshot()
+^$::TakeScreenshot()
+
+; --- Fullscreen Screenshot: Cmd + Shift + 3 / # ---
 #+3::Send("{PrintScreen}")
 !+3::Send("{PrintScreen}")
 ^+3::Send("{PrintScreen}")
 
-#+5::Run("ms-screenclip:")
-!+5::Run("ms-screenclip:")
-^+5::Run("ms-screenclip:")
+; --- Screen Recording / Snip Bar: Cmd + Shift + 5 / % ---
+#+5::TakeScreenshot()
+!+5::TakeScreenshot()
+^+5::TakeScreenshot()
 
 ; ==============================================================================
 ;  SECTION 3: CLIPBOARD & EDITING SHORTCUTS
