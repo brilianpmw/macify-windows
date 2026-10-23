@@ -117,12 +117,20 @@ GroupAdd("Browsers", "ahk_exe brave.exe")
 
 ; ==============================================================================
 ;  SECTION 3: SCREENSHOT CAPTURE (macOS Style)
+;  Cmd + Shift + 4 -> Interactive Region Snipping Tool
+;  Cmd + Shift + 3 -> Fullscreen Screenshot (to Clipboard)
+;  Cmd + Shift + 5 -> Snipping Tool / Screen Recording Toolbar
 ; ==============================================================================
-; Cmd + Shift + 4 -> Region Screenshot (Windows Snipping Tool)
-#+4::Send("#+s")
 
-; Cmd + Shift + 3 -> Fullscreen Screenshot (PrintScreen)
+; --- Apple Magic Keyboard (Command sends LWin #) ---
+#+4::Send("#+s")
 #+3::Send("{PrintScreen}")
+#+5::Send("#+s")
+
+; --- PC Keyboard fallback (where Alt ! is used by thumb) ---
+!+4::Send("#+s")
+!+3::Send("{PrintScreen}")
+!+5::Send("#+s")
 
 ; ==============================================================================
 ;  SECTION 4: TEXT NAVIGATION & EDITING (Option / Command Jumps)
