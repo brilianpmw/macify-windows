@@ -1,29 +1,42 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
+#UseHook true
+InstallKeybdHook()
 Persistent
 
 ; ==============================================================================
 ;  PROJECT: Macify Windows 🍎
-;  File: Macify.ahk (AutoHotkey v2 Core Keyboard Engine)
-;  Description: Replicates macOS muscle memory on Windows 11 with support for
-;               Apple Magic Keyboard and standard PC keyboards.
+;  File: Macify.ahk (AutoHotkey v2 Core Keyboard Engine - Enhanced)
+;  Description: Rock-solid macOS shortcut replication for Windows 11.
+;               Supports Apple Magic Keyboard (Bluetooth/USB) & standard PC keyboards.
 ; ==============================================================================
 
 ; --- Tray Configuration ---
 A_IconTip := "Macify Windows (Active)"
-TraySetIcon("shell32.dll", 44) ; Star/favorite icon
+TraySetIcon("shell32.dll", 44) ; Star icon
 
 ; --- Global State ---
 global isSuspended := false
 
 ; --- Tray Menu ---
 A_TrayMenu.Delete()
-A_TrayMenu.Add("Macify Windows v1.0", (*) => Run("https://github.com/"))
-A_TrayMenu.Disable("Macify Windows v1.0")
+A_TrayMenu.Add("Macify Windows v1.1", (*) => Run("https://github.com/brilianpmw/macify-windows"))
+A_TrayMenu.Disable("Macify Windows v1.1")
 A_TrayMenu.Add() ; Separator
 A_TrayMenu.Add("Toggle Gaming Mode (Ctrl+Shift+G)", ToggleSuspend)
 A_TrayMenu.Add("Reload Script", (*) => Reload())
 A_TrayMenu.Add("Exit", (*) => ExitApp())
+
+; ------------------------------------------------------------------------------
+;  HELPER: Clean Send Function
+;  Releases physical Command (LWin/LAlt) before dispatching Windows Ctrl shortcuts.
+;  This prevents Windows 11 from seeing "Win + Ctrl + key" or opening Copilot/Start.
+; ------------------------------------------------------------------------------
+SendCmd(shortcut) {
+    SetKeyDelay(-1)
+    ; Release Windows & Alt modifiers to prevent key collision
+    SendEvent("{Blind}{LWin up}{RWin up}{LAlt up}{RAlt up}" . shortcut)
+}
 
 ; ------------------------------------------------------------------------------
 ;  HOTKEY: Toggle Gaming Mode (Suspend/Resume all shortcuts)
@@ -57,19 +70,22 @@ GroupAdd("Terminals", "ahk_exe bash.exe")
 
 #HotIf WinActive("ahk_group Terminals")
 ; In terminal: Cmd+C copies, Cmd+V pastes, while Ctrl+C remains SIGINT!
-#c::Send("^+c")           ; Mac Cmd+C -> Terminal Copy (Ctrl+Shift+C)
-#v::Send("^+v")           ; Mac Cmd+V -> Terminal Paste (Ctrl+Shift+V)
-!c::Send("^+c")           ; Alt+C fallback
-!v::Send("^+v")           ; Alt+V fallback
+$#c::SendCmd("^+c")           ; Mac Cmd+C -> Terminal Copy (Ctrl+Shift+C)
+$!c::SendCmd("^+c")           ; Alt+C fallback -> Terminal Copy
+$#v::SendCmd("^+v")           ; Mac Cmd+V -> Terminal Paste (Ctrl+Shift+V)
+$!v::SendCmd("^+v")           ; Alt+V fallback -> Terminal Paste
 #HotIf
 
 ; --- Visual Studio Code ---
 #HotIf WinActive("ahk_exe Code.exe")
-#p::Send("^p")            ; Cmd+P -> Quick Open
-#+p::Send("^+p")          ; Cmd+Shift+P -> Command Palette
-#/::Send("^/")            ; Cmd+/ -> Toggle Comment
-#[::Send("^[")            ; Cmd+[ -> Outdent
-#]::Send("^]")            ; Cmd+] -> Indent
+$#p::SendCmd("^p")            ; Cmd+P -> Quick Open
+$!p::SendCmd("^p")
+$#+p::SendCmd("^+p")          ; Cmd+Shift+P -> Command Palette
+$!+p::SendCmd("^+p")
+$#/::SendCmd("^/")            ; Cmd+/ -> Toggle Comment
+$!/::SendCmd("^/")
+$#[::SendCmd("^[")            ; Cmd+[ -> Outdent
+$!]::SendCmd("^]")
 #HotIf
 
 ; --- Web Browsers ---
@@ -79,58 +95,81 @@ GroupAdd("Browsers", "ahk_exe firefox.exe")
 GroupAdd("Browsers", "ahk_exe brave.exe")
 
 #HotIf WinActive("ahk_group Browsers")
-#l::Send("^l")            ; Cmd+L -> Focus Address Bar
-#r::Send("^r")            ; Cmd+R -> Reload Page
-#+r::Send("^+r")          ; Cmd+Shift+R -> Hard Reload
-#[::Send("!{Left}")       ; Cmd+[ -> History Back
-#]::Send("!{Right}")      ; Cmd+] -> History Forward
+$#l::SendCmd("^l")            ; Cmd+L -> Focus Address Bar
+$!l::SendCmd("^l")
+$#r::SendCmd("^r")            ; Cmd+R -> Reload Page
+$!r::SendCmd("^r")
+$#+r::SendCmd("^+r")          ; Cmd+Shift+R -> Hard Reload
+$!+r::SendCmd("^+r")
+$#[::SendCmd("!{Left}")       ; Cmd+[ -> History Back
+$#]::SendCmd("!{Right}")      ; Cmd+] -> History Forward
 #HotIf
 
 ; ==============================================================================
-;  SECTION 2: GLOBAL CORE SHORTCUTS (Command Key Mappings)
-;  Note: On Apple keyboards, Command sends LWin (#). On standard PC keyboards,
-;        we also provide Alt mappings so thumb-modifier works naturally.
+;  SECTION 2: GLOBAL CORE SHORTCUTS (Dual mapped for Apple & PC Keyboards)
+;  Apple Keyboards send LWin (#) for Command.
+;  Standard PC Keyboards have thumb on Alt (!).
 ; ==============================================================================
 
-; --- Standard Clipboard & Document Operations ---
-#c::Send("^c")            ; Cmd+C -> Copy
-#v::Send("^v")            ; Cmd+V -> Paste
-#x::Send("^x")            ; Cmd+X -> Cut
-#a::Send("^a")            ; Cmd+A -> Select All
-#z::Send("^z")            ; Cmd+Z -> Undo
-#+z::Send("^y")           ; Cmd+Shift+Z -> Redo
-#s::Send("^s")            ; Cmd+S -> Save
-#f::Send("^f")            ; Cmd+F -> Find
-#t::Send("^t")            ; Cmd+T -> New Tab
+; --- Clipboard: Copy ---
+$#c::SendCmd("^c")
+$!c::SendCmd("^c")
 
-; --- Window & Application Lifecycle ---
-#w::Send("^w")            ; Cmd+W -> Close Tab / Window
-#q::Send("!{F4}")         ; Cmd+Q -> Quit Application
-#m::Send("#{Down}")       ; Cmd+M -> Minimize Window
+; --- Clipboard: Paste ---
+$#v::SendCmd("^v")
+$!v::SendCmd("^v")
+
+; --- Clipboard: Cut ---
+$#x::SendCmd("^x")
+$!x::SendCmd("^x")
+
+; --- Select All ---
+$#a::SendCmd("^a")
+$!a::SendCmd("^a")
+
+; --- Undo & Redo ---
+$#z::SendCmd("^z")
+$!z::SendCmd("^z")
+$#+z::SendCmd("^y")
+$!+z::SendCmd("^y")
+
+; --- Save & Find ---
+$#s::SendCmd("^s")
+$!s::SendCmd("^s")
+$#f::SendCmd("^f")
+$!f::SendCmd("^f")
+
+; --- Tabs & Windows ---
+$#t::SendCmd("^t")
+$!t::SendCmd("^t")
+$#w::SendCmd("^w")
+$!w::SendCmd("^w")
+$#q::SendCmd("!{F4}")
+$!q::SendCmd("!{F4}")
+$#m::SendCmd("#{Down}")
+$!m::SendCmd("#{Down}")
 
 ; --- Application Switching (Cmd + Tab) ---
-; Replicates Mac Cmd+Tab using Windows Task Switcher
-#Tab::Send("!{Tab}")
+$#Tab::SendCmd("!{Tab}")
 
 ; --- Spotlight / Launcher (Cmd + Space) ---
-#Space::Send("!{Space}")
+$#Space::SendCmd("!{Space}")
+$!Space::SendCmd("!{Space}")
 
 ; ==============================================================================
 ;  SECTION 3: SCREENSHOT CAPTURE (macOS Style)
-;  Cmd + Shift + 4 -> Interactive Region Snipping Tool
+;  Cmd + Shift + 4 -> Interactive Snipping Tool (Region Capture)
 ;  Cmd + Shift + 3 -> Fullscreen Screenshot (to Clipboard)
 ;  Cmd + Shift + 5 -> Snipping Tool / Screen Recording Toolbar
 ; ==============================================================================
+$#+4::SendCmd("#+s")
+$!+4::SendCmd("#+s")
 
-; --- Apple Magic Keyboard (Command sends LWin #) ---
-#+4::Send("#+s")
-#+3::Send("{PrintScreen}")
-#+5::Send("#+s")
+$#+3::SendCmd("{PrintScreen}")
+$!+3::SendCmd("{PrintScreen}")
 
-; --- PC Keyboard fallback (where Alt ! is used by thumb) ---
-!+4::Send("#+s")
-!+3::Send("{PrintScreen}")
-!+5::Send("#+s")
+$#+5::SendCmd("#+s")
+$!+5::SendCmd("#+s")
 
 ; ==============================================================================
 ;  SECTION 4: TEXT NAVIGATION & EDITING (Option / Command Jumps)
@@ -138,29 +177,29 @@ GroupAdd("Browsers", "ahk_exe brave.exe")
 ; ==============================================================================
 
 ; --- Word Navigation (Option + Left/Right) ---
-!Left::Send("^{Left}")
-!Right::Send("^{Right}")
+$!Left::SendCmd("^{Left}")
+$!Right::SendCmd("^{Right}")
 
 ; --- Word Deletion (Option + Backspace / Delete) ---
-!Backspace::Send("^{Backspace}")
-!Delete::Send("^{Delete}")
+$!Backspace::SendCmd("^{Backspace}")
+$!Delete::SendCmd("^{Delete}")
 
 ; --- Line Navigation (Command + Left/Right) ---
-#Left::Send("{Home}")
-#Right::Send("{End}")
+$#Left::SendCmd("{Home}")
+$#Right::SendCmd("{End}")
 
 ; --- Document Top / Bottom (Command + Up/Down) ---
-#Up::Send("^{Home}")
-#Down::Send("^{End}")
+$#Up::SendCmd("^{Home}")
+$#Down::SendCmd("^{End}")
 
 ; --- Word Selection (Option + Shift + Left/Right) ---
-!+Left::Send("^+{Left}")
-!+Right::Send("^+{Right}")
+$!+Left::SendCmd("^+{Left}")
+$!+Right::SendCmd("^+{Right}")
 
 ; --- Line Selection (Command + Shift + Left/Right) ---
-#+Left::Send("+{Home}")
-#+Right::Send("+{End}")
+$#+Left::SendCmd("+{Home}")
+$#+Right::SendCmd("+{End}")
 
 ; --- Document Selection (Command + Shift + Up/Down) ---
-#+Up::Send("^+{Home}")
-#+Down::Send("^+{End}")
+$#+Up::SendCmd("^+{Home}")
+$#+Down::SendCmd("^+{End}")
