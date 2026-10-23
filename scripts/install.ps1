@@ -24,6 +24,13 @@ $AhkScriptPath = Join-Path $ProjectRoot "configs\autohotkey\Macify.ahk"
 $StartupFolder = [System.IO.Path]::Combine($env:APPDATA, "Microsoft\Windows\Start Menu\Programs\Startup")
 $StartupShortcut = Join-Path $StartupFolder "MacifyWindows.lnk"
 
+# 0. Automatic Pre-Installation Backup
+Write-Host "`n[0/4] Performing Automatic System Backup..." -ForegroundColor Yellow
+$backupScript = Join-Path $ScriptDir "backup.ps1"
+if (Test-Path $backupScript) {
+    & $backupScript
+}
+
 # 1. Check or Install AutoHotkey v2
 Write-Host "`n[1/4] Checking AutoHotkey v2..." -ForegroundColor Yellow
 $ahkInstalled = (Get-Command AutoHotkey64.exe -ErrorAction SilentlyContinue) -or (Test-Path "$env:ProgramFiles\AutoHotkey\v2\AutoHotkey64.exe") -or (Test-Path "$env:LOCALAPPDATA\Programs\AutoHotkey\v2\AutoHotkey64.exe")

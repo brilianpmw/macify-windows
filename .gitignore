@@ -3,6 +3,10 @@ Thumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
+# Local backup snapshots (protects local registry keys and personal startup links)
+backups/*
+!backups/.gitkeep
+
 # Logs & temp
 *.log
 *.tmp
