@@ -19,12 +19,33 @@ global isSuspended := false
 
 ; --- Tray Menu ---
 A_TrayMenu.Delete()
-A_TrayMenu.Add("Macify Windows v1.2", (*) => Run("https://github.com/brilianpmw/macify-windows"))
-A_TrayMenu.Disable("Macify Windows v1.2")
+A_TrayMenu.Add("Macify Windows v1.3", (*) => ShowWelcomeDialog())
 A_TrayMenu.Add() ; Separator
 A_TrayMenu.Add("Toggle Gaming Mode (Ctrl+Shift+G)", ToggleSuspend)
 A_TrayMenu.Add("Reload Script", (*) => Reload())
 A_TrayMenu.Add("Exit", (*) => ExitApp())
+
+; ------------------------------------------------------------------------------
+;  STARTUP CONFIRMATION WINDOW
+; ------------------------------------------------------------------------------
+ShowWelcomeDialog() {
+    splash := Gui("+AlwaysOnTop", "Macify Windows 🍎")
+    splash.SetFont("s12 Bold", "Segoe UI")
+    splash.Add("Text", "w380 Center", "🍎 Macify Windows is Active!")
+    splash.SetFont("s9 Normal", "Segoe UI")
+    splash.Add("Text", "w380", "`nYour macOS shortcuts are now running in the background:`n`n  • Cmd + Shift + 4  ->  Screenshot area`n  • Cmd + C / Cmd + V  ->  Copy / Paste`n  • Cmd + Space  ->  Spotlight search`n  • Option + ◄ / ►  ->  Jump word-by-word`n  • Ctrl + Shift + G  ->  Pause for Gaming Mode`n")
+    
+    btnSnip := splash.Add("Button", "w180 h32", "📸 Test Screenshot")
+    btnSnip.OnEvent("Click", (*) => Run("ms-screenclip:"))
+    
+    btnOk := splash.Add("Button", "x+20 w180 h32 Default", "Minimize to Tray")
+    btnOk.OnEvent("Click", (*) => splash.Destroy())
+    
+    splash.Show("w420")
+}
+
+; Show welcome dialog on launch
+ShowWelcomeDialog()
 
 ; ------------------------------------------------------------------------------
 ;  HOTKEY: Toggle Gaming Mode (Ctrl+Shift+G)
