@@ -64,21 +64,19 @@ GroupAdd("Terminals", "ahk_exe bash.exe")
 
 ; ==============================================================================
 ;  SECTION 2: SCREENSHOT SHORTCUTS (macOS Style)
-;  Cmd + Shift + 4  -> Snipping Tool (Region Capture)
-;  Cmd + Shift + 3  -> Fullscreen Screenshot
-;  Cmd + Shift + 5  -> Snipping Tool / Screen Recording
+;  Uses native ms-screenclip: protocol for 100% reliable region capture on Windows 11.
 ; ==============================================================================
-#+4::Send("#+s")
-!+4::Send("#+s")
-^+4::Send("#+s")
+#+4::Run("ms-screenclip:")
+!+4::Run("ms-screenclip:")
+^+4::Run("ms-screenclip:")
 
 #+3::Send("{PrintScreen}")
 !+3::Send("{PrintScreen}")
 ^+3::Send("{PrintScreen}")
 
-#+5::Send("#+s")
-!+5::Send("#+s")
-^+5::Send("#+s")
+#+5::Run("ms-screenclip:")
+!+5::Run("ms-screenclip:")
+^+5::Run("ms-screenclip:")
 
 ; ==============================================================================
 ;  SECTION 3: CLIPBOARD & EDITING SHORTCUTS
