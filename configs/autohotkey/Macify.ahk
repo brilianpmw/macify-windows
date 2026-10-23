@@ -43,7 +43,7 @@ ShowWelcomeDialog() {
     splash := Gui("+AlwaysOnTop", "Macify Windows 🍎")
     splash.SetFont("s12 Bold", "Segoe UI")
     splash.Add("Text", "w380 Center", "🍎 Macify Windows is Active!")
-    splash.SetFont("s9 Normal", "Segoe UI")
+    splash.SetFont("s9 norm", "Segoe UI")
     splash.Add("Text", "w380", "`nYour macOS shortcuts are now running in the background:`n`n  • Cmd + Shift + 4  ->  Screenshot area`n  • Cmd + C / Cmd + V  ->  Copy / Paste`n  • Cmd + Space  ->  Spotlight search`n  • Option + ◄ / ►  ->  Jump word-by-word`n  • Ctrl + Shift + G  ->  Pause for Gaming Mode`n")
     
     btnSnip := splash.Add("Button", "w180 h32", "📸 Test Screenshot")
