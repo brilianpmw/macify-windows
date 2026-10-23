@@ -1,0 +1,11 @@
+# Windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Logs & temp
+*.log
+*.tmp
+
+# User-specific local overrides
+.local/
